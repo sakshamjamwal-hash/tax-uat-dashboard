@@ -42,8 +42,9 @@ function isNoteCol(cols, ci) {
   return c === 'impact'
 }
 
-export default function FindingsTable({ block, tableKey, editState, deletedRows = {}, addedRows = {}, onEdit, onDelete, onAddRow, isAdmin }) {
+export default function FindingsTable({ block, tableKey, editState, deletedRows = {}, addedRows = {}, onEdit, onDelete, onAddRow, isAdmin, colWidths, onRowJump, jumpableIds }) {
   const cols = block.columns
+  const jumpSet = jumpableIds || new Set()
 
   const extraRows = addedRows[tableKey] || []
   // Hide rows the admin has deleted (persisted). Added rows are always shown.
@@ -52,7 +53,14 @@ export default function FindingsTable({ block, tableKey, editState, deletedRows 
 
   return (
     <div className="findings">
-      <table>
+      <table className={colWidths ? 'ft-fixed' : ''}>
+        {colWidths && (
+          <colgroup>
+            {cols.map((c, i) => <col key={i} style={colWidths[c] ? { width: colWidths[c] } : undefined} />)}
+            <col style={colWidths.__fix ? { width: colWidths.__fix } : undefined} />
+            {isAdmin && <col style={{ width: '30px' }} />}
+          </colgroup>
+        )}
         <thead>
           <tr>
             {cols.map(c => <th key={c}>{c}</th>)}
@@ -68,6 +76,18 @@ export default function FindingsTable({ block, tableKey, editState, deletedRows 
                 {row.cells.map((cell, ci) => {
                   const cellKey = `${rowKey}:${ci}`
                   const val = editState[cellKey] !== undefined ? editState[cellKey] : cell
+
+                  // "#" column — clickable to jump to its annotation on the screenshot
+                  if ((cols[ci] || '') === '#') {
+                    const jumpable = onRowJump && jumpSet.has(row.id)
+                    return (
+                      <td key={ci} className="num-cell">
+                        {jumpable
+                          ? <button className="row-jump" title="Show on screenshot" onClick={() => onRowJump(row.id)}>{val}</button>
+                          : <span>{val}</span>}
+                      </td>
+                    )
+                  }
 
                   if (isPriorityCol(cols, ci)) {
                     const sevVal = editState[`${rowKey}:sev`] !== undefined ? editState[`${rowKey}:sev`] : cell

@@ -2,24 +2,23 @@ const SEV_CLASS = { C: 'sev-C', H: 'sev-H', M: 'sev-M', L: 'sev-L' }
 const SEV_LABEL = { C: 'Critical', H: 'High', M: 'Medium', L: 'Low' }
 const SEV_ANN = { C: 'ann-C', H: 'ann-H', M: 'ann-M', L: 'ann-L' }
 
-export default function AnnotationLayer({ image, alt, annotations = [], onImageClick }) {
+export default function AnnotationLayer({ image, alt, annotations = [], onImageClick, highlightId }) {
   return (
-    <div
-      className="ann-layer"
-      style={{ position: 'relative', lineHeight: 0, overflow: 'visible' }}
-    >
+    <div className="ann-layer">
       <img
+        className="ann-img"
         src={image}
         alt={alt || ''}
-        style={{ width: '100%', height: 'auto', display: 'block', cursor: onImageClick ? 'zoom-in' : 'default' }}
+        style={{ cursor: onImageClick ? 'zoom-in' : 'default' }}
         onClick={onImageClick}
       />
       {annotations.map((a, i) => {
         const sevCls = a.specialPriority ? 'ann-M' : (SEV_ANN[a.priority] || 'ann-M')
+        const pulse = highlightId && a.id === highlightId ? ' ann-box--pulse' : ''
         return (
           <div
             key={a.ref || i}
-            className={`ann-box ${sevCls}`}
+            className={`ann-box ${sevCls}${pulse}`}
             style={{
               position: 'absolute',
               left: `${a.x}%`,

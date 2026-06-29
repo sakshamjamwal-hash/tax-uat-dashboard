@@ -5,6 +5,7 @@ function buildAnns(rows, on) {
   return rows
     .filter(r => r.ann && r.ann.on === on)
     .map(r => ({
+      id: r.id,
       ref: r.cells[0],
       element: r.cells[1],
       build: r.cells[2],
@@ -18,7 +19,7 @@ function buildAnns(rows, on) {
     }))
 }
 
-export default function NavCompare({ compare, rows, onLightbox }) {
+export default function NavCompare({ compare, rows, onLightbox, highlightId }) {
   const figmaAnns = buildAnns(rows, 'figma')
   const liveAnns = buildAnns(rows, 'live')
 
@@ -52,6 +53,7 @@ export default function NavCompare({ compare, rows, onLightbox }) {
                 image={compare.figma.img}
                 alt={compare.figma.alt}
                 annotations={figmaAnns}
+                highlightId={highlightId}
                 onImageClick={() => onLightbox && onLightbox(compare.figma.img, compare.figma.alt, figmaAnns)}
               />
             </div>
@@ -78,6 +80,7 @@ export default function NavCompare({ compare, rows, onLightbox }) {
                 image={compare.live.img}
                 alt={compare.live.alt}
                 annotations={liveAnns}
+                highlightId={highlightId}
                 onImageClick={() => onLightbox && onLightbox(compare.live.img, compare.live.alt, liveAnns)}
               />
             </div>

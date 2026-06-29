@@ -522,6 +522,36 @@ main {
 .findings td.el { color: var(--fg); }
 .findings td.note { font-size: 11px; color: var(--fg-dim); }
 
+/* ── Fixed-layout table (nav merged gaps) — gives Fix column real room ── */
+.findings table.ft-fixed { table-layout: fixed; }
+.findings table.ft-fixed td,
+.findings table.ft-fixed th { white-space: normal; overflow-wrap: anywhere; word-break: break-word; }
+.findings table.ft-fixed td.num-cell,
+.findings table.ft-fixed td.row-act { white-space: nowrap; }
+.findings table.ft-fixed .fix-cell { line-height: 1.5; }
+
+/* ── "#" cell + jump-to-annotation button ── */
+.num-cell { white-space: nowrap; }
+.num-cell > span {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--fg-dim);
+}
+.row-jump {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-08);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--r-sm);
+  padding: 2px 9px;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.row-jump:hover { background: rgba(255, 88, 0, 0.18); }
+.row-jump:active { transform: scale(0.92); }
+
 /* ── Editable cells ── */
 [contenteditable] {
   outline: none;
@@ -779,8 +809,26 @@ tr:hover .del-row:hover { opacity: 1; color: var(--danger); }
 .screen-full {
   background: #0e0e0e;
   overflow: visible;
+  display: flex;
+  justify-content: center;
+  padding: 14px 12px;
 }
-.screen-full .ann-layer img { cursor: zoom-in; }
+.ann-layer {
+  position: relative;
+  line-height: 0;
+  display: inline-block;
+  max-width: 100%;
+}
+/* tall screenshots fit to height, wide ones fit to width — capped so the
+   table stays reachable without endless scrolling */
+.ann-img {
+  display: block;
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 58vh;
+}
+.screen-full .ann-img { cursor: zoom-in; }
 
 /* ── Precise annotation overlay (AnnotationLayer) ── */
 .ann-box {
@@ -811,6 +859,16 @@ tr:hover .del-row:hover { opacity: 1; color: var(--danger); }
 .ann-box.ann-H .ann-num { background: var(--accent); }
 .ann-box.ann-M .ann-num { background: var(--info); }
 .ann-box.ann-L .ann-num { background: var(--fg-dim); }
+/* pulse when a table row jumps to its annotation */
+.ann-box--pulse {
+  animation: annPulse 0.6s ease-out 3;
+  z-index: 5;
+}
+@keyframes annPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.0); }
+  30%  { box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.55); }
+  100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.0); }
+}
 .ann-tip {
   position: absolute;
   bottom: calc(100% + 8px);
@@ -876,10 +934,11 @@ tr:hover .del-row:hover { opacity: 1; color: var(--danger); }
   max-height: 88vh;
 }
 .lb-ann .ann-layer { max-height: 88vh; }
-.lb-ann .ann-layer img {
+.lb-ann .ann-img {
   max-width: 92vw;
   max-height: 88vh;
   width: auto;
+  height: auto;
   border-radius: var(--r-md);
   box-shadow: 0 0 80px rgba(0, 0, 0, 0.6);
 }
