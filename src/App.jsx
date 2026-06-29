@@ -274,7 +274,7 @@ export default function App() {
       case 'overview':
         return <Overview {...common} />
       case 'nav':
-        return <NavAudit {...common} onLightbox={(src, alt) => setLightbox({ src, alt })} />
+        return <NavAudit {...common} onLightbox={(src, alt, annotations) => setLightbox({ src, alt, annotations })} />
       default:
         return <SceneTab {...common} onLightbox={(src, alt) => setLightbox({ src, alt })} />
     }
@@ -318,7 +318,7 @@ export default function App() {
         />
       )}
       {lightbox && (
-        <Lightbox src={lightbox.src} alt={lightbox.alt} onClose={() => setLightbox(null)} />
+        <Lightbox src={lightbox.src} alt={lightbox.alt} annotations={lightbox.annotations} onClose={() => setLightbox(null)} />
       )}
       {showPasswordModal && (
         <PasswordModal
