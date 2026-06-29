@@ -7,8 +7,8 @@ function buildAnns(rows, on, numById) {
     .map(r => ({
       id: r.id,
       ref: numById.get(r.id), // sequential number — matches the table
-      element: r.cells[1],
-      build: r.cells[2],
+      element: r.ann.element ?? r.cells[1],
+      build: r.ann.build ?? r.cells[2],
       fix: r.fix,
       priority: r.cells[4],
       specialPriority: r.specialPriority,

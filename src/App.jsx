@@ -8,6 +8,7 @@ import StatCards from './components/StatCards.jsx'
 import TabNav from './components/TabNav.jsx'
 import Overview from './components/Overview.jsx'
 import NavAudit from './components/NavAudit.jsx'
+import PairView from './components/PairView.jsx'
 import SceneTab from './components/SceneTab.jsx'
 import EditBar from './components/EditBar.jsx'
 import UndoToast from './components/UndoToast.jsx'
@@ -15,6 +16,9 @@ import Lightbox from './components/Lightbox.jsx'
 import PasswordModal from './components/PasswordModal.jsx'
 
 const LOCAL_KEY = 'uat-state'
+
+// Built-in (Tax Filing) default META — used when no imported uat-data.json is present.
+const DEFAULT_META = null
 
 function loadLocal() {
   try {
@@ -55,6 +59,27 @@ export default function App() {
 
   // Lightbox state
   const [lightbox, setLightbox] = useState(null)
+
+  // ── Imported-mode state ──
+  // tabs/meta default to the built-in Tax Filing dashboard; replaced if a
+  // converted /uat-data.json is found at runtime (non-breaking).
+  const [tabs, setTabs] = useState(TABS)
+  const [meta, setMeta] = useState(DEFAULT_META)
+
+  useEffect(() => {
+    let cancelled = false
+    fetch('/uat-data.json')
+      .then(r => (r.ok ? r.json() : null))
+      .then(data => {
+        if (cancelled || !data || !Array.isArray(data.tabs) || data.tabs.length === 0) return
+        setTabs(data.tabs)
+        setMeta({ ...data.meta, tabCount: data.tabs.length })
+        // If the persisted active tab isn't in the imported set, jump to the first.
+        setActiveTab(prev => (data.tabs.some(t => t.id === prev) ? prev : data.tabs[0].id))
+      })
+      .catch(() => { /* absent/offline: keep built-in Tax Filing dashboard */ })
+    return () => { cancelled = true }
+  }, [])
 
   // ── Load the shared store on mount (source of truth for everyone) ──
   useEffect(() => {
@@ -256,7 +281,7 @@ export default function App() {
 
   const editState = edits
 
-  const tabData = TABS.find(t => t.id === activeTab)
+  const tabData = tabs.find(t => t.id === activeTab) || tabs[0]
 
   function renderTab() {
     if (!tabData) return null
@@ -269,6 +294,10 @@ export default function App() {
       onDelete: handleDelete,
       onAddRow: handleAddRow,
       isAdmin,
+    }
+    // Imported (converted) data: every tab is a Figma↔Build pair.
+    if (tabData.kind === 'pair') {
+      return <PairView {...common} onLightbox={(src, alt, annotations) => setLightbox({ src, alt, annotations })} />
     }
     switch (tabData.id) {
       case 'overview':
@@ -284,20 +313,33 @@ export default function App() {
     <>
       <TopStrip isAdmin={isAdmin} onAdminToggle={handleAdminToggle} />
       <main>
-        <Hero />
-        <StatCards />
-        <TabNav activeTab={activeTab} onTabChange={handleTabChange} />
+        <Hero meta={meta} />
+        <StatCards meta={meta} />
+        <TabNav activeTab={activeTab} onTabChange={handleTabChange} tabs={tabs} />
         <Reveal key={activeTab} className="tab-pane" y={8} duration={0.32}>
           {renderTab()}
         </Reveal>
-        <footer className="footer">
-          <div className="fl">
-            Tax Filing UAT · INDmoney Web · Figma <code>za8e35wfWeVkUTqZ8TyJHz</code> · 2026-06-19
-          </div>
-          <div className="fr">
-            <span className="mono">8 SECTIONS · 172 GAPS · 11C · 68H · 73M · 20L</span>
-          </div>
-        </footer>
+        {meta ? (
+          <footer className="footer">
+            <div className="fl">
+              {meta.title} · {meta.subtitle}{meta.figmaKey ? <> · Figma <code>{meta.figmaKey}</code></> : null}{meta.generatedAt ? ` · ${meta.generatedAt}` : ''}
+            </div>
+            <div className="fr">
+              <span className="mono">
+                {tabs.length} PAIRS · {meta.stats?.total ?? 0} GAPS · {meta.stats?.critical ?? 0}C · {meta.stats?.major ?? 0}H · {meta.stats?.minor ?? 0}M · {meta.stats?.needsVerify ?? 0} VERIFY
+              </span>
+            </div>
+          </footer>
+        ) : (
+          <footer className="footer">
+            <div className="fl">
+              Tax Filing UAT · INDmoney Web · Figma <code>za8e35wfWeVkUTqZ8TyJHz</code> · 2026-06-19
+            </div>
+            <div className="fr">
+              <span className="mono">8 SECTIONS · 172 GAPS · 11C · 68H · 73M · 20L</span>
+            </div>
+          </footer>
+        )}
       </main>
 
       {isAdmin && (

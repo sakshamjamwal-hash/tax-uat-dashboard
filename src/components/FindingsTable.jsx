@@ -105,15 +105,15 @@ export default function FindingsTable({ block, tableKey, editState, deletedRows 
                     if (!isAdmin) {
                       const displayVal = SEV_MAP[sevVal] || sevVal || 'Medium'
                       const cls = SEV_RMAP[displayVal] || ''
+                      if (row.specialPriority) {
+                        return <td key={ci}><span className="sev sev-M">{row.specialPriority}</span></td>
+                      }
                       if (!sevVal || sevVal === '—') {
                         return (
                           <td key={ci}>
                             <span style={{ color: 'var(--fg-dim)', fontFamily: 'var(--font-mono)', fontSize: '9px' }}>—</span>
                           </td>
                         )
-                      }
-                      if (row.specialPriority) {
-                        return <td key={ci}><span className="sev sev-M">{row.specialPriority}</span></td>
                       }
                       return (
                         <td key={ci}>

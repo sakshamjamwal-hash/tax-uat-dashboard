@@ -819,6 +819,23 @@ tr:hover .del-row:hover { opacity: 1; color: var(--danger); }
   display: inline-block;
   max-width: 100%;
 }
+.ann-layer--empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 220px;
+  line-height: 1.4;
+  background: repeating-linear-gradient(45deg, var(--border-soft), var(--border-soft) 10px, transparent 10px, transparent 20px);
+  border: 1px dashed var(--border);
+}
+.ann-empty {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--fg-dim);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
 /* tall screenshots fit to height, wide ones fit to width — capped so the
    table stays reachable without endless scrolling */
 .ann-img {

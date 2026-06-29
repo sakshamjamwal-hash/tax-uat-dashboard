@@ -3,6 +3,13 @@ const SEV_LABEL = { C: 'Critical', H: 'High', M: 'Medium', L: 'Low' }
 const SEV_ANN = { C: 'ann-C', H: 'ann-H', M: 'ann-M', L: 'ann-L' }
 
 export default function AnnotationLayer({ image, alt, annotations = [], onImageClick, highlightId }) {
+  if (!image) {
+    return (
+      <div className="ann-layer ann-layer--empty">
+        <div className="ann-empty">No screenshot captured</div>
+      </div>
+    )
+  }
   return (
     <div className="ann-layer">
       <img

@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion'
 import { TABS } from '../data/gaps.js'
 
-export default function TabNav({ activeTab, onTabChange }) {
+export default function TabNav({ activeTab, onTabChange, tabs = TABS }) {
   return (
     <nav className="tab-nav">
-      {TABS.map(tab => {
+      {tabs.map(tab => {
         const active = activeTab === tab.id
         return (
           <button
