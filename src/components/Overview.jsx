@@ -1,12 +1,13 @@
 import SectionHeader from './SectionHeader.jsx'
 import FindingsTable from './FindingsTable.jsx'
+import Reveal from './Reveal.jsx'
 
-export default function Overview({ tab, editState, onEdit, onDelete, isAdmin }) {
+export default function Overview({ tab, editState, deletedRows, addedRows, onEdit, onDelete, onAddRow, isAdmin }) {
   return (
     <div>
       {/* Systematic gaps */}
       <SectionHeader idx={tab.sectionHeader.idx} title={tab.sectionHeader.title} />
-      <div className="block">
+      <Reveal className="block" y={20} delay={0.06}>
         <div className="bh">
           <h3>{tab.blocks[0].header}</h3>
           <span className="cnt">{tab.blocks[0].count}</span>
@@ -15,15 +16,18 @@ export default function Overview({ tab, editState, onEdit, onDelete, isAdmin }) 
           block={tab.blocks[0]}
           tableKey={`overview:systematic`}
           editState={editState}
+          deletedRows={deletedRows}
+          addedRows={addedRows}
           onEdit={onEdit}
           onDelete={onDelete}
+          onAddRow={onAddRow}
           isAdmin={isAdmin}
         />
-      </div>
+      </Reveal>
 
       {/* Critical gaps */}
       <SectionHeader idx={tab.blocks[1].sectionHeader.idx} title={tab.blocks[1].sectionHeader.title} />
-      <div className="block">
+      <Reveal className="block" y={20} delay={0.12}>
         <div className="bh">
           <h3>{tab.blocks[1].header}</h3>
           <span className="cnt">{tab.blocks[1].count}</span>
@@ -32,14 +36,17 @@ export default function Overview({ tab, editState, onEdit, onDelete, isAdmin }) 
           block={tab.blocks[1]}
           tableKey={`overview:critical`}
           editState={editState}
+          deletedRows={deletedRows}
+          addedRows={addedRows}
           onEdit={onEdit}
           onDelete={onDelete}
+          onAddRow={onAddRow}
           isAdmin={isAdmin}
         />
-      </div>
+      </Reveal>
 
       {/* Root cause analysis */}
-      <div className="block" style={{ marginTop: '48px' }}>
+      <Reveal className="block" y={20} delay={0.18} style={{ marginTop: '48px' }}>
         <div className="bh">
           <h3>Why these were missed — root cause breakdown</h3>
           <span className="cnt">6 categories</span>
@@ -54,7 +61,7 @@ export default function Overview({ tab, editState, onEdit, onDelete, isAdmin }) 
             </div>
           ))}
         </div>
-      </div>
+      </Reveal>
 
       {/* Missing sections note */}
       <div

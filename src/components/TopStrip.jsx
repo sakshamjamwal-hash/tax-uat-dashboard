@@ -1,3 +1,5 @@
+import { motion } from 'framer-motion'
+
 export default function TopStrip({ isAdmin, onAdminToggle }) {
   return (
     <div className="topstrip">
@@ -7,8 +9,11 @@ export default function TopStrip({ isAdmin, onAdminToggle }) {
       </div>
       <div className="side" style={{ gap: '16px' }}>
         <span className="mono">TESTER · SAKSHAM JAMWAL</span>
-        <button
+        <motion.button
           onClick={onAdminToggle}
+          whileHover={{ y: -1, borderColor: 'var(--accent)', color: 'var(--accent)' }}
+          whileTap={{ scale: 0.95 }}
+          transition={{ duration: 0.15 }}
           style={{
             border: isAdmin ? '1px solid var(--accent)' : '1px solid var(--border)',
             color: isAdmin ? 'var(--accent)' : 'var(--fg-dim)',
@@ -24,7 +29,7 @@ export default function TopStrip({ isAdmin, onAdminToggle }) {
           }}
         >
           {isAdmin ? 'Exit Admin' : 'Admin'}
-        </button>
+        </motion.button>
       </div>
     </div>
   )

@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
+import { motion } from 'framer-motion'
+import { scrim, pop } from '../motion.js'
 
 export default function PasswordModal({ onSubmit, onClose }) {
   const [pw, setPw] = useState('')
@@ -25,25 +27,36 @@ export default function PasswordModal({ onSubmit, onClose }) {
   }
 
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      background: 'rgba(0,0,0,.7)',
-      zIndex: 800,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    }} onClick={onClose}>
-      <div style={{
-        background: 'var(--surface-2)',
-        border: '1px solid var(--border)',
-        borderRadius: 'var(--r-xl)',
-        padding: '32px 28px',
-        width: '320px',
+    <motion.div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0,0,0,.7)',
+        zIndex: 800,
         display: 'flex',
-        flexDirection: 'column',
-        gap: '20px',
-      }} onClick={e => e.stopPropagation()}>
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+      onClick={onClose}
+      variants={scrim}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
+      <motion.div
+        style={{
+          background: 'var(--surface-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--r-xl)',
+          padding: '32px 28px',
+          width: '320px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '20px',
+        }}
+        onClick={e => e.stopPropagation()}
+        variants={pop}
+      >
         <div style={{ fontFamily: 'var(--font-mono)', fontSize: '11px', letterSpacing: '.12em', textTransform: 'uppercase', color: 'var(--fg-muted)' }}>
           Admin Access
         </div>
@@ -87,7 +100,7 @@ export default function PasswordModal({ onSubmit, onClose }) {
             Enter Admin
           </button>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

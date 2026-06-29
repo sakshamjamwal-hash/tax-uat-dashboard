@@ -1,5 +1,6 @@
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback, useRef, useEffect } from 'react'
 import { TABS } from './data/gaps.js'
+import Reveal from './components/Reveal.jsx'
 
 import TopStrip from './components/TopStrip.jsx'
 import Hero from './components/Hero.jsx'
@@ -13,9 +14,19 @@ import UndoToast from './components/UndoToast.jsx'
 import Lightbox from './components/Lightbox.jsx'
 import PasswordModal from './components/PasswordModal.jsx'
 
-function loadEdits() {
-  try { return JSON.parse(localStorage.getItem('uat-edits') || '{}') }
-  catch { return {} }
+const LOCAL_KEY = 'uat-state'
+
+function loadLocal() {
+  try {
+    const s = JSON.parse(localStorage.getItem(LOCAL_KEY) || '{}')
+    return { edits: s.edits || {}, deletedRows: s.deletedRows || {}, addedRows: s.addedRows || {} }
+  } catch {
+    return { edits: {}, deletedRows: {}, addedRows: {} }
+  }
+}
+
+function saveLocal(state) {
+  try { localStorage.setItem(LOCAL_KEY, JSON.stringify(state)) } catch {}
 }
 
 export default function App() {
@@ -26,10 +37,16 @@ export default function App() {
 
   const [isAdmin, setIsAdmin] = useState(() => localStorage.getItem('uat-admin') === '1')
   const [showPasswordModal, setShowPasswordModal] = useState(false)
+  const adminPwRef = useRef(null)
+  const pendingSaveRef = useRef(false)
 
-  const [edits, setEdits] = useState(loadEdits)
-  const [deletedRows, setDeletedRows] = useState({})
+  const initial = loadLocal()
+  const [edits, setEdits] = useState(initial.edits)
+  const [deletedRows, setDeletedRows] = useState(initial.deletedRows)
+  const [addedRows, setAddedRows] = useState(initial.addedRows)
   const [dirty, setDirty] = useState(false)
+  const [saveStatus, setSaveStatus] = useState('idle') // idle | saving | saved | error
+  const [saveError, setSaveError] = useState('')
 
   // Undo toast state
   const [undoVisible, setUndoVisible] = useState(false)
@@ -39,9 +56,43 @@ export default function App() {
   // Lightbox state
   const [lightbox, setLightbox] = useState(null)
 
+  // ── Load the shared store on mount (source of truth for everyone) ──
+  useEffect(() => {
+    let cancelled = false
+    fetch('/api/edits')
+      .then(r => (r.ok ? r.json() : null))
+      .then(data => {
+        if (cancelled || !data) return
+        // Don't clobber unsaved local admin edits mid-session
+        if (dirty) return
+        const next = {
+          edits: data.edits || {},
+          deletedRows: data.deletedRows || {},
+          addedRows: data.addedRows || {},
+        }
+        setEdits(next.edits)
+        setDeletedRows(next.deletedRows)
+        setAddedRows(next.addedRows)
+        saveLocal(next)
+      })
+      .catch(() => { /* local dev / offline: keep localStorage copy */ })
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Keep a local draft cache in sync
+  function persistLocal(nextEdits, nextDeleted, nextAdded) {
+    saveLocal({
+      edits: nextEdits ?? edits,
+      deletedRows: nextDeleted ?? deletedRows,
+      addedRows: nextAdded ?? addedRows,
+    })
+  }
+
   function handleAdminToggle() {
     if (isAdmin) {
       localStorage.removeItem('uat-admin')
+      adminPwRef.current = null
       setIsAdmin(false)
     } else {
       setShowPasswordModal(true)
@@ -51,8 +102,14 @@ export default function App() {
   function handlePasswordSubmit(pw) {
     if (pw === 'pabothegreat') {
       localStorage.setItem('uat-admin', '1')
+      adminPwRef.current = pw
       setIsAdmin(true)
       setShowPasswordModal(false)
+      if (pendingSaveRef.current) {
+        pendingSaveRef.current = false
+        // run the deferred save now that we have the password
+        setTimeout(() => doSave(pw), 0)
+      }
       return true
     }
     return false
@@ -67,58 +124,125 @@ export default function App() {
     undoFnRef.current = fn
     setUndoMessage(message)
     setUndoVisible(false)
-    // force remount to reset animation
     requestAnimationFrame(() => setUndoVisible(true))
   }
 
   const handleEdit = useCallback((key, value) => {
     setEdits(prev => {
       const next = { ...prev, [key]: value }
-      try { localStorage.setItem('uat-edits', JSON.stringify(next)) } catch {}
+      persistLocal(next)
       return next
     })
     setDirty(true)
+    setSaveStatus('idle')
     showUndo('Edit undone', () => {
       setEdits(prev => {
         const next = { ...prev }
         delete next[key]
-        try { localStorage.setItem('uat-edits', JSON.stringify(next)) } catch {}
+        persistLocal(next)
         return next
       })
     })
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [edits, deletedRows, addedRows])
 
-  const handleDelete = useCallback((rowKey) => {
-    setDeletedRows(prev => ({ ...prev, [rowKey]: true }))
+  const handleDelete = useCallback((rowKey, isNew) => {
+    if (isNew) {
+      // rowKey here is `${tableKey}:${rowId}` — strip to find which table/row
+      setAddedRows(prev => {
+        const next = {}
+        for (const [tk, rows] of Object.entries(prev)) {
+          next[tk] = rows.filter(r => `${tk}:${r.id}` !== rowKey)
+        }
+        persistLocal(undefined, undefined, next)
+        return next
+      })
+      setDirty(true)
+      setSaveStatus('idle')
+      return
+    }
+    setDeletedRows(prev => {
+      const next = { ...prev, [rowKey]: true }
+      persistLocal(undefined, next)
+      return next
+    })
     setDirty(true)
+    setSaveStatus('idle')
     showUndo('Row deleted', () => {
       setDeletedRows(prev => {
         const next = { ...prev }
         delete next[rowKey]
+        persistLocal(undefined, next)
         return next
       })
     })
-  }, [])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [edits, deletedRows, addedRows])
 
-  function handleSave() {
-    const data = JSON.stringify({ edits, deletedRows }, null, 2)
-    const blob = new Blob([data], { type: 'application/json' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'uat-edits.json'
-    document.body.appendChild(a)
-    a.click()
-    document.body.removeChild(a)
-    URL.revokeObjectURL(url)
-    setDirty(false)
+  const handleAddRow = useCallback((tableKey, colCount) => {
+    const id = `new-${Date.now()}-${Math.round(performance.now())}`
+    setAddedRows(prev => {
+      const rows = prev[tableKey] || []
+      const next = { ...prev, [tableKey]: [...rows, { id, cells: Array(colCount).fill(''), fix: '' }] }
+      persistLocal(undefined, undefined, next)
+      return next
+    })
+    setDirty(true)
+    setSaveStatus('idle')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [edits, deletedRows, addedRows])
+
+  async function doSave(pwOverride) {
+    const password = pwOverride || adminPwRef.current
+    if (!password) {
+      // No password in memory (e.g. after a reload) — ask for it, then save
+      pendingSaveRef.current = true
+      setShowPasswordModal(true)
+      return
+    }
+    setSaveStatus('saving')
+    setSaveError('')
+    try {
+      const res = await fetch('/api/edits', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password, edits, deletedRows, addedRows }),
+      })
+      if (res.status === 401) throw new Error('Wrong password — re-enter admin')
+      if (!res.ok) throw new Error('Save failed (' + res.status + ')')
+      setDirty(false)
+      setSaveStatus('saved')
+      setTimeout(() => setSaveStatus('idle'), 2500)
+    } catch (e) {
+      setSaveStatus('error')
+      setSaveError(e.message || 'Save failed')
+    }
   }
 
+  function handleSave() { doSave() }
+
   function handleCancel() {
-    if (!dirty || confirm('Discard all changes?')) {
-      setEdits(loadEdits())
-      setDeletedRows({})
-      setDirty(false)
+    if (!dirty || confirm('Discard unsaved changes?')) {
+      // Re-pull the shared store
+      fetch('/api/edits')
+        .then(r => (r.ok ? r.json() : null))
+        .then(data => {
+          const next = {
+            edits: (data && data.edits) || {},
+            deletedRows: (data && data.deletedRows) || {},
+            addedRows: (data && data.addedRows) || {},
+          }
+          setEdits(next.edits)
+          setDeletedRows(next.deletedRows)
+          setAddedRows(next.addedRows)
+          saveLocal(next)
+          setDirty(false)
+          setSaveStatus('idle')
+        })
+        .catch(() => {
+          setDirty(false)
+          setSaveStatus('idle')
+        })
     }
   }
 
@@ -130,20 +254,29 @@ export default function App() {
     setUndoVisible(false)
   }
 
-  // Merge edits + deletions into combined state for children
-  const editState = { ...edits }
+  const editState = edits
 
   const tabData = TABS.find(t => t.id === activeTab)
 
   function renderTab() {
     if (!tabData) return null
+    const common = {
+      tab: tabData,
+      editState,
+      deletedRows,
+      addedRows,
+      onEdit: handleEdit,
+      onDelete: handleDelete,
+      onAddRow: handleAddRow,
+      isAdmin,
+    }
     switch (tabData.id) {
       case 'overview':
-        return <Overview tab={tabData} editState={editState} onEdit={handleEdit} onDelete={handleDelete} isAdmin={isAdmin} />
+        return <Overview {...common} />
       case 'nav':
-        return <NavAudit tab={tabData} editState={editState} onEdit={handleEdit} onDelete={handleDelete} onLightbox={(src, alt) => setLightbox({ src, alt })} isAdmin={isAdmin} />
+        return <NavAudit {...common} onLightbox={(src, alt) => setLightbox({ src, alt })} />
       default:
-        return <SceneTab tab={tabData} editState={editState} onEdit={handleEdit} onDelete={handleDelete} onLightbox={(src, alt) => setLightbox({ src, alt })} isAdmin={isAdmin} />
+        return <SceneTab {...common} onLightbox={(src, alt) => setLightbox({ src, alt })} />
     }
   }
 
@@ -154,9 +287,9 @@ export default function App() {
         <Hero />
         <StatCards />
         <TabNav activeTab={activeTab} onTabChange={handleTabChange} />
-        <div className="tab-pane">
+        <Reveal key={activeTab} className="tab-pane" y={8} duration={0.32}>
           {renderTab()}
-        </div>
+        </Reveal>
         <footer className="footer">
           <div className="fl">
             Tax Filing UAT · INDmoney Web · Figma <code>za8e35wfWeVkUTqZ8TyJHz</code> · 2026-06-19
@@ -167,7 +300,15 @@ export default function App() {
         </footer>
       </main>
 
-      {isAdmin && <EditBar dirty={dirty} onSave={handleSave} onCancel={handleCancel} />}
+      {isAdmin && (
+        <EditBar
+          dirty={dirty}
+          status={saveStatus}
+          error={saveError}
+          onSave={handleSave}
+          onCancel={handleCancel}
+        />
+      )}
       {isAdmin && (
         <UndoToast
           message={undoMessage}
@@ -182,7 +323,7 @@ export default function App() {
       {showPasswordModal && (
         <PasswordModal
           onSubmit={handlePasswordSubmit}
-          onClose={() => setShowPasswordModal(false)}
+          onClose={() => { pendingSaveRef.current = false; setShowPasswordModal(false) }}
         />
       )}
     </>

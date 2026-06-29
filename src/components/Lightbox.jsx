@@ -1,4 +1,6 @@
 import { useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { scrim, pop } from '../motion.js'
 
 export default function Lightbox({ src, alt, onClose }) {
   useEffect(() => {
@@ -10,11 +12,22 @@ export default function Lightbox({ src, alt, onClose }) {
   if (!src) return null
 
   return (
-    <div className="lb open" onClick={onClose}>
-      <div className="lb-wrap" onClick={e => e.stopPropagation()}>
+    <motion.div
+      className="lb open"
+      onClick={onClose}
+      variants={scrim}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+    >
+      <motion.div
+        className="lb-wrap"
+        onClick={e => e.stopPropagation()}
+        variants={pop}
+      >
         <div className="lb-close">ESC / CLICK TO CLOSE</div>
         <img src={src} alt={alt || ''} onClick={onClose} />
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }

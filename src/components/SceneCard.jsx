@@ -1,3 +1,7 @@
+import { motion } from 'framer-motion'
+import Reveal from './Reveal.jsx'
+import { EASE } from '../motion.js'
+
 const SEV_MAP = { C: 'sev-C', H: 'sev-H', M: 'sev-M', L: 'sev-L' }
 const SEV_LABEL = { C: 'Critical', H: 'High', M: 'Medium', L: 'Low' }
 
@@ -9,11 +13,11 @@ function PriorityBadge({ code, special }) {
   return <span className={`sev ${cls}`}>{SEV_LABEL[code] || code}</span>
 }
 
-export default function SceneCard({ scene, tabId, editState, onEdit, onDelete, onLightbox, isAdmin }) {
+export default function SceneCard({ scene, tabId, editState, deletedRows, addedRows, onEdit, onDelete, onAddRow, onLightbox, isAdmin }) {
   const hasTable = scene.rows && scene.rows.length > 0 && scene.columns
 
   return (
-    <section className="scene">
+    <Reveal as="section" className="scene" y={20} delay={0.05}>
       <div className="sm">
         <div className="lbl">
           <span className="name">{scene.name}</span>
@@ -47,11 +51,13 @@ export default function SceneCard({ scene, tabId, editState, onEdit, onDelete, o
             <div className={`screen${scene.tall ? ' tall' : ''}`}>
               {scene.figma.img ? (
                 <div className="ann-wrap" style={{ height: '100%' }}>
-                  <img
+                  <motion.img
                     src={scene.figma.img}
                     alt={scene.figma.alt}
                     loading="lazy"
                     onClick={() => onLightbox && onLightbox(scene.figma.img, scene.figma.alt)}
+                    whileHover={{ scale: 1.025 }}
+                    transition={{ duration: 0.4, ease: EASE }}
                   />
                   {(scene.figmaAnns || []).map((ann, i) => (
                     <div
@@ -95,11 +101,13 @@ export default function SceneCard({ scene, tabId, editState, onEdit, onDelete, o
             </div>
             <div className={`screen${scene.tall ? ' tall' : ''}`}>
               <div className="ann-wrap" style={{ height: '100%' }}>
-                <img
+                <motion.img
                   src={scene.live.img}
                   alt={scene.live.alt}
                   loading="lazy"
                   onClick={() => onLightbox && onLightbox(scene.live.img, scene.live.alt)}
+                  whileHover={{ scale: 1.025 }}
+                  transition={{ duration: 0.4, ease: EASE }}
                 />
                 {(scene.liveAnns || []).map((ann, i) => (
                   <div
@@ -126,21 +134,28 @@ export default function SceneCard({ scene, tabId, editState, onEdit, onDelete, o
           scene={scene}
           tabId={tabId}
           editState={editState}
+          deletedRows={deletedRows}
+          addedRows={addedRows}
           onEdit={onEdit}
           onDelete={onDelete}
+          onAddRow={onAddRow}
           isAdmin={isAdmin}
         />
       )}
-    </section>
+    </Reveal>
   )
 }
 
 // Inline table for scenes
-function FindingsTableInScene({ scene, tabId, editState, onEdit, onDelete, isAdmin }) {
+function FindingsTableInScene({ scene, tabId, editState, deletedRows = {}, addedRows = {}, onEdit, onDelete, onAddRow, isAdmin }) {
   const tableKey = `scene:${scene.id}`
   const cols = scene.columns
   const SEV_CODE_MAP = { C: 'Critical', H: 'High', M: 'Medium', L: 'Low' }
   const SEV_RMAP = { Critical: 'sev-C', High: 'sev-H', Medium: 'sev-M', Low: 'sev-L' }
+
+  const extraRows = addedRows[tableKey] || []
+  const baseRows = scene.rows.filter(row => !deletedRows[`${tableKey}:${row.id}`])
+  const allRows = [...baseRows, ...extraRows]
 
   return (
     <div className="findings">
@@ -153,7 +168,7 @@ function FindingsTableInScene({ scene, tabId, editState, onEdit, onDelete, isAdm
           </tr>
         </thead>
         <tbody>
-          {scene.rows.map(row => {
+          {allRows.map(row => {
             const key = `${tableKey}:${row.id}`
             return (
               <tr key={row.id}>
@@ -215,7 +230,7 @@ function FindingsTableInScene({ scene, tabId, editState, onEdit, onDelete, isAdm
                 )}
                 {isAdmin && (
                   <td className="row-act">
-                    <button className="del-row" title="Delete" onClick={() => onDelete(key)}>×</button>
+                    <button className="del-row" title="Delete" onClick={() => onDelete(key, String(row.id).startsWith('new-'))}>×</button>
                   </td>
                 )}
               </tr>
@@ -226,7 +241,7 @@ function FindingsTableInScene({ scene, tabId, editState, onEdit, onDelete, isAdm
           <tfoot>
             <tr>
               <td colSpan={cols.length + 2} className="add-row-cell">
-                <button className="add-row-btn">+ Add gap</button>
+                <button className="add-row-btn" onClick={() => onAddRow(tableKey, cols.length)}>+ Add gap</button>
               </td>
             </tr>
           </tfoot>

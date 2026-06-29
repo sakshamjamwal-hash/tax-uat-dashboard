@@ -283,13 +283,22 @@ main {
   cursor: pointer;
   white-space: nowrap;
   margin-bottom: -1px;
-  transition: color 0.15s, border-color 0.15s;
+  transition: color 0.15s;
   display: flex;
   align-items: center;
   gap: 6px;
+  position: relative;
 }
 .tab-btn:hover { color: var(--fg-muted); }
-.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-btn.active { color: var(--accent); }
+.tab-underline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 2px;
+  background: var(--accent);
+}
 
 /* ── Tab pane ── */
 .tab-pane { padding-top: 16px; }

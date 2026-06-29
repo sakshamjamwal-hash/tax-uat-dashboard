@@ -1,5 +1,3 @@
-import { useState } from 'react'
-
 const SEV_MAP = { C: 'Critical', H: 'High', M: 'Medium', L: 'Low' }
 const SEV_RMAP = { Critical: 'sev-C', High: 'sev-H', Medium: 'sev-M', Low: 'sev-L' }
 
@@ -44,16 +42,13 @@ function isNoteCol(cols, ci) {
   return c === 'impact'
 }
 
-export default function FindingsTable({ block, tableKey, editState, onEdit, onDelete, isAdmin }) {
-  const [extraRows, setExtraRows] = useState([])
+export default function FindingsTable({ block, tableKey, editState, deletedRows = {}, addedRows = {}, onEdit, onDelete, onAddRow, isAdmin }) {
   const cols = block.columns
 
-  function addRow() {
-    const id = `new-${Date.now()}`
-    setExtraRows(r => [...r, { id, cells: cols.map(() => ''), fix: '' }])
-  }
-
-  const allRows = [...block.rows, ...extraRows]
+  const extraRows = addedRows[tableKey] || []
+  // Hide rows the admin has deleted (persisted). Added rows are always shown.
+  const baseRows = block.rows.filter(row => !deletedRows[`${tableKey}:${row.id}`])
+  const allRows = [...baseRows, ...extraRows]
 
   return (
     <div className="findings">
@@ -173,13 +168,7 @@ export default function FindingsTable({ block, tableKey, editState, onEdit, onDe
                     <button
                       className="del-row"
                       title="Delete"
-                      onClick={() => {
-                        if (row.id.startsWith('new-')) {
-                          setExtraRows(r => r.filter(x => x.id !== row.id))
-                        } else {
-                          onDelete(rowKey)
-                        }
-                      }}
+                      onClick={() => onDelete(rowKey, row.id.startsWith('new-'))}
                     >×</button>
                   </td>
                 )}
@@ -191,7 +180,7 @@ export default function FindingsTable({ block, tableKey, editState, onEdit, onDe
           <tfoot>
             <tr>
               <td colSpan={cols.length + 2} className="add-row-cell">
-                <button className="add-row-btn" onClick={addRow}>+ Add gap</button>
+                <button className="add-row-btn" onClick={() => onAddRow(tableKey, cols.length)}>+ Add gap</button>
               </td>
             </tr>
           </tfoot>

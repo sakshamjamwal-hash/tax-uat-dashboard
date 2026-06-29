@@ -203,7 +203,7 @@ function LiveSpecCell({ row }) {
   return <div style={{ fontSize: '11px', color: 'var(--fg-dim)' }}>{desc}</div>
 }
 
-export default function NavAudit({ tab, editState, onEdit, onDelete, onLightbox, isAdmin }) {
+export default function NavAudit({ tab, editState, deletedRows, addedRows, onEdit, onDelete, onAddRow, onLightbox, isAdmin }) {
   return (
     <div>
       <SectionHeader idx={tab.sectionHeader.idx} title={tab.sectionHeader.title} />
@@ -217,8 +217,11 @@ export default function NavAudit({ tab, editState, onEdit, onDelete, onLightbox,
             scene={scene}
             tabId="nav"
             editState={editState}
+            deletedRows={deletedRows}
+            addedRows={addedRows}
             onEdit={onEdit}
             onDelete={onDelete}
+            onAddRow={onAddRow}
             onLightbox={onLightbox}
             isAdmin={isAdmin}
           />
@@ -240,8 +243,11 @@ export default function NavAudit({ tab, editState, onEdit, onDelete, onLightbox,
               block={block}
               tableKey={`nav:${block.id}`}
               editState={editState}
+              deletedRows={deletedRows}
+              addedRows={addedRows}
               onEdit={onEdit}
               onDelete={onDelete}
+              onAddRow={onAddRow}
               isAdmin={isAdmin}
             />
           </div>
