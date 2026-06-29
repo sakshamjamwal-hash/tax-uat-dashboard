@@ -69,22 +69,24 @@ export default function FindingsTable({ block, tableKey, editState, deletedRows 
           </tr>
         </thead>
         <tbody>
-          {allRows.map(row => {
+          {allRows.map((row, rowIndex) => {
             const rowKey = `${tableKey}:${row.id}`
+            // Serial number is always derived from visible position — auto-rectifies on add/delete
+            const serial = rowIndex + 1
             return (
               <tr key={row.id}>
                 {row.cells.map((cell, ci) => {
                   const cellKey = `${rowKey}:${ci}`
                   const val = editState[cellKey] !== undefined ? editState[cellKey] : cell
 
-                  // "#" column — clickable to jump to its annotation on the screenshot
+                  // "#" column — sequential serial, clickable to jump to its annotation
                   if ((cols[ci] || '') === '#') {
                     const jumpable = onRowJump && jumpSet.has(row.id)
                     return (
                       <td key={ci} className="num-cell">
                         {jumpable
-                          ? <button className="row-jump" title="Show on screenshot" onClick={() => onRowJump(row.id)}>{val}</button>
-                          : <span>{val}</span>}
+                          ? <button className="row-jump" title="Show on screenshot" onClick={() => onRowJump(row.id)}>{serial}</button>
+                          : <span>{serial}</span>}
                       </td>
                     )
                   }

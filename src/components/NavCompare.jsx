@@ -1,12 +1,12 @@
 import Reveal from './Reveal.jsx'
 import AnnotationLayer from './AnnotationLayer.jsx'
 
-function buildAnns(rows, on) {
+function buildAnns(rows, on, numById) {
   return rows
-    .filter(r => r.ann && r.ann.on === on)
+    .filter(r => r.ann && r.ann.on === on && numById.has(r.id))
     .map(r => ({
       id: r.id,
-      ref: r.cells[0],
+      ref: numById.get(r.id), // sequential number — matches the table
       element: r.cells[1],
       build: r.cells[2],
       fix: r.fix,
@@ -19,9 +19,16 @@ function buildAnns(rows, on) {
     }))
 }
 
-export default function NavCompare({ compare, rows, onLightbox, highlightId }) {
-  const figmaAnns = buildAnns(rows, 'figma')
-  const liveAnns = buildAnns(rows, 'live')
+export default function NavCompare({ compare, rows, tableKey, deletedRows = {}, addedRows = {}, onLightbox, highlightId }) {
+  // Same visible ordering the table uses, so annotation numbers always match
+  const visible = [
+    ...rows.filter(r => !deletedRows[`${tableKey}:${r.id}`]),
+    ...(addedRows[tableKey] || []),
+  ]
+  const numById = new Map(visible.map((r, i) => [r.id, i + 1]))
+
+  const figmaAnns = buildAnns(rows, 'figma', numById)
+  const liveAnns = buildAnns(rows, 'live', numById)
 
   return (
     <Reveal as="section" className="scene" y={20} delay={0.05}>

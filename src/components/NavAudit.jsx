@@ -35,7 +35,15 @@ export default function NavAudit({ tab, editState, deletedRows, addedRows, onEdi
     <div className="nav-audit">
       <SectionHeader idx={tab.sectionHeader.idx} title={tab.sectionHeader.title} />
 
-      <NavCompare compare={tab.compare} rows={block.rows} onLightbox={onLightbox} highlightId={highlightId} />
+      <NavCompare
+        compare={tab.compare}
+        rows={block.rows}
+        tableKey="nav:gaps"
+        deletedRows={deletedRows}
+        addedRows={addedRows}
+        onLightbox={onLightbox}
+        highlightId={highlightId}
+      />
 
       <div className="block">
         <div className="bh">

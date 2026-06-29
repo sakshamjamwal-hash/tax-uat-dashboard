@@ -168,13 +168,17 @@ function FindingsTableInScene({ scene, tabId, editState, deletedRows = {}, added
           </tr>
         </thead>
         <tbody>
-          {allRows.map(row => {
+          {allRows.map((row, rowIndex) => {
             const key = `${tableKey}:${row.id}`
             return (
               <tr key={row.id}>
                 {row.cells.map((cell, ci) => {
                   const cellKey = `${key}:${ci}`
                   const val = editState[cellKey] !== undefined ? editState[cellKey] : cell
+                  // "#" column — sequential serial, auto-rectifies on add/delete
+                  if ((cols[ci] || '') === '#') {
+                    return <td key={ci} className="num-cell"><span>{rowIndex + 1}</span></td>
+                  }
                   // Priority cell (last col)
                   if (ci === row.cells.length - 1) {
                     const sevVal = editState[`${key}:sev`] !== undefined ? editState[`${key}:sev`] : row.cells[ci]
