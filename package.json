@@ -7,7 +7,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "import-uat": "node scripts/import-uat.mjs"
+    "import-uat": "node scripts/import-uat.mjs",
+    "export-project": "node scripts/export-project.mjs",
+    "seed-taxfiling": "node scripts/seed-taxfiling.mjs"
   },
   "dependencies": {
     "@vercel/blob": "^2.5.0",
