@@ -40,34 +40,7 @@ export default function NavCompare({ compare, rows, tableKey, deletedRows = {}, 
       </div>
 
       <div className="compare">
-        {/* Figma pane */}
-        <div className="pane">
-          <div className="ph">
-            <div className="pw">
-              <span className="dot" />
-              <span className="t">Design</span>
-              <span className="src">Figma</span>
-            </div>
-            <span className="pv">{compare.figma.node}</span>
-          </div>
-          <div className="browser">
-            <div className="bbar">
-              <span className="traf"><i /><i /><i /></span>
-              <span className="url">{compare.figma.url}</span>
-            </div>
-            <div className="screen-full">
-              <AnnotationLayer
-                image={compare.figma.img}
-                alt={compare.figma.alt}
-                annotations={figmaAnns}
-                highlightId={highlightId}
-                onImageClick={() => onLightbox && onLightbox(compare.figma.img, compare.figma.alt, figmaAnns)}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Live pane */}
+        {/* Build pane (left) */}
         <div className="pane">
           <div className="ph">
             <div className="pw">
@@ -89,6 +62,33 @@ export default function NavCompare({ compare, rows, tableKey, deletedRows = {}, 
                 annotations={liveAnns}
                 highlightId={highlightId}
                 onImageClick={() => onLightbox && onLightbox(compare.live.img, compare.live.alt, liveAnns)}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Figma pane (right) */}
+        <div className="pane">
+          <div className="ph">
+            <div className="pw">
+              <span className="dot" />
+              <span className="t">Design</span>
+              <span className="src">Figma</span>
+            </div>
+            <span className="pv">{compare.figma.node}</span>
+          </div>
+          <div className="browser">
+            <div className="bbar">
+              <span className="traf"><i /><i /><i /></span>
+              <span className="url">{compare.figma.url}</span>
+            </div>
+            <div className="screen-full">
+              <AnnotationLayer
+                image={compare.figma.img}
+                alt={compare.figma.alt}
+                annotations={figmaAnns}
+                highlightId={highlightId}
+                onImageClick={() => onLightbox && onLightbox(compare.figma.img, compare.figma.alt, figmaAnns)}
               />
             </div>
           </div>
