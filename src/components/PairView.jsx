@@ -7,8 +7,8 @@ import NavCompare from './NavCompare.jsx'
 const PAIR_COL_WIDTHS = {
   '#': '40px',
   'Element': '16%',
-  'Figma (expected)': '20%',
-  'Build (actual)': '23%',
+  'Build': '23%',
+  'Figma': '20%',
   'Priority': '88px',
   __fix: '27%',
 }
