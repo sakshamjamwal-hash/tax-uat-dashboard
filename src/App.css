@@ -853,58 +853,38 @@ tr:hover .del-row:hover { opacity: 1; color: var(--danger); }
   box-sizing: border-box;
   border-radius: 4px;
   background: transparent;
-  opacity: 0;
+  border: 2px dotted transparent;   /* outline hidden until its pin is hovered */
   pointer-events: none;
-  transition: opacity 0.15s ease;
+  transition: border-color 0.15s ease;
   z-index: 2;
 }
-.ann-box--shown { opacity: 1; }
-.ann-box.ann-C { border: 2px dotted var(--danger); }
-.ann-box.ann-H { border: 2px dotted var(--accent); }
-.ann-box.ann-M { border: 2px dotted var(--info); }
-.ann-box.ann-L { border: 2px dotted var(--fg-dim); }
+/* dotted outline appears only for the hovered / jumped gap */
+.ann-box--active.ann-C { border-color: var(--danger); }
+.ann-box--active.ann-H { border-color: var(--accent); }
+.ann-box--active.ann-M { border-color: var(--info); }
+.ann-box--active.ann-L { border-color: var(--fg-dim); }
 
-/* Gap-count badge — the only persistent marker; hover to reveal dotted gaps */
-.gap-counter {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 40px;
-  height: 40px;
-  border-radius: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family: var(--font-mono);
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--accent);
-  background: rgba(12, 12, 12, 0.78);
-  border: 1.5px solid var(--accent-border);
-  backdrop-filter: blur(4px);
-  cursor: help;
-  z-index: 10;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-}
-.gap-counter:hover, .gap-counter:focus {
-  background: var(--accent);
-  border-color: var(--accent);
-  color: #0d0d0d;
-  outline: none;
-}
+/* Numbered pin — persistent marker at each gap, always visible */
 .ann-num {
   position: absolute;
-  top: -9px; left: -2px;
+  top: -10px; left: -6px;
   font-family: var(--font-mono);
-  font-size: 8px;
+  font-size: 9px;
   font-weight: 700;
   letter-spacing: 0.04em;
-  padding: 1px 5px;
-  border-radius: 2px;
-  line-height: 1.5;
+  min-width: 16px;
+  padding: 2px 5px;
+  border-radius: 4px;
+  line-height: 1.4;
+  text-align: center;
   color: #fff;
   white-space: nowrap;
+  pointer-events: auto;
+  cursor: help;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35);
+  transition: transform 0.12s ease;
 }
+.ann-num:hover { transform: scale(1.15); }
 .ann-box.ann-C .ann-num { background: var(--danger); }
 .ann-box.ann-H .ann-num { background: var(--accent); }
 .ann-box.ann-M .ann-num { background: var(--info); }
