@@ -272,35 +272,26 @@ export const TABS = [
   },
 
   // ── S03 UPLOADS ───────────────────────────────────────────────────────────
+
   {
     id: 's03',
     label: '03 · Uploads',
     kind: 'pair',
-    sectionHeader: { idx: '03', title: 'Uploads — Indian Equity' },
+    sectionHeader: { idx: '03', title: 'Uploads — Choose Broker' },
     compare: {
-      desc: 'Broker selection grid + manual-upload template. Auto-sync badge, stepper pill, CTA green and card radii drift from Figma.',
+      desc: 'Uploads → Choose Broker to upload statements (Step 2.2). Re-audited against the correct Figma frame — the build closely matches; the main gap is a missing broker.',
       tag: 'SCENE 03',
-      figma: { node: '4235:262145 · Indian Equity Broker Selection', url: 'figma · source of truth', img: '/figma-screenshots/scene03-correct.png', alt: 'Figma — Indian Equity Broker Selection' },
-      live: { node: 'frame_0209 · t=836s', url: 'indmoney.com · tax filing', img: '/video-frames/frame_0209_t00834s.jpg', alt: 'Live build — Uploads' },
+      figma: { node: '8727:51370 · Choose Broker to upload statements', url: 'figma · source of truth', img: '/figma-screenshots/scene-uploads-broker.png', alt: 'Figma — Choose Broker to upload statements' },
+      live: { node: 'f_0041 · t=205s (2:53–3:53)', url: 'indmoney.com · tax filing', img: '/video-frames/uploads-broker.jpg', alt: 'Build — Choose Broker to upload statements' },
     },
     block: {
       id: 's03-gaps',
       header: 'Uploads — all gaps',
-      count: '12 gaps',
+      count: '2 gaps',
       columns: ['#', 'Element', 'Build', 'Figma', 'Priority'],
       rows: [
-        { id: '2', cells: ['', 'Active stepper sub-item — background', 'Plain dot bullet, no pill fill', '#e9fbec green pill behind active item', 'H'], fix: fix('2', 'tab-s03'), ann: { on: 'live', x: 17, y: 20, w: 17, h: 6, element: 'Active stepper sub-item — background', build: 'Plain dot bullet, no pill fill' } },
-        { id: '3', cells: ['', 'Active stepper sub-item — weight', 'Renders Regular', 'Inter Medium 500', 'H'], fix: fix('3', 'tab-s03') },
-        { id: '4', cells: ['', 'Auto-Synced badge — style', 'Checkmark circle only, no text', 'Green pill with text label', 'H'], fix: fix('4', 'tab-s03'), ann: { on: 'live', x: 46, y: 7, w: 4, h: 4, element: 'Auto-Synced badge — style', build: 'Checkmark circle only, no text' } },
-        { id: '5', cells: ['', 'Upload step indicators — style', 'Plain grey number circles, no border', 'Outlined bordered badges', 'H'], fix: fix('5', 'tab-s03'), ann: { on: 'live', x: 33, y: 56, w: 3, h: 4, element: 'Upload step indicators — style', build: 'Plain grey number circles, no border' } },
-        { id: '6', cells: ['', 'CTA Continue — background', '~#3a9e6f different green', '#089959 green', 'H'], fix: fix('6', 'tab-s03'), ann: { on: 'live', x: 37, y: 96, w: 11, h: 4, element: 'CTA Continue — background', build: '~#3a9e6f different green' } },
-        { id: '7', cells: ['', 'Radio option cards — border color', '~#e0e0e0 darker', '#efefef', 'M'], fix: fix('7', 'tab-s03') },
-        { id: '8', cells: ['', 'Radio option cards — radius', '~8px', '12px', 'M'], fix: fix('8', 'tab-s03') },
-        { id: '9', cells: ['', 'Radio button unselected — size', '~16px', '20px diameter', 'M'], fix: fix('9', 'tab-s03') },
-        { id: '10', cells: ['', 'Broker card grid — radius', '~12px', '16px', 'M'], fix: fix('10', 'tab-s03'), ann: { on: 'live', x: 31, y: 9, w: 21, h: 13, element: 'Broker card grid — radius', build: '~12px' } },
-        { id: '11', cells: ['', 'Checkbox unchecked — size', '~14px, flat border', '16×16px, 1.5px border', 'M'], fix: fix('11', 'tab-s03') },
-        { id: '12', cells: ['', 'Back button — height', '~44px, lighter border', '40px, border #e5e5e5', 'M'], fix: fix('12', 'tab-s03'), ann: { on: 'live', x: 31, y: 96, w: 6, h: 4, element: 'Back button — height', build: '~44px, lighter border' } },
-        { id: '14', cells: ['', 'Upload CTA — border width', 'Appears ~1px', '1.5px', 'L'], fix: fix('14', 'tab-s03') },
+        { id: 'U1', cells: ['', 'Supported brokers list', 'Only 5 brokers — INDmoney, Groww, Zerodha, Angel One, Dhan; Upstox absent, last row asymmetric', '6 brokers in a 3×2 grid, incl. Upstox (between Angel One and Dhan)', 'H'], fix: 'Add the Upstox broker card to the Indian Equity broker grid so the set matches Figma (INDmoney, Groww, Zerodha, Angel One, Upstox, Dhan).', ann: { on: 'live', x: 30, y: 25, w: 62, h: 13, element: 'Supported brokers list', build: 'Upstox missing — only 5 brokers, last row asymmetric' } },
+        { id: 'U2', cells: ['', '"No gains" opt-out checkbox', 'Checkbox "I do not have any gains from Indian Stock Investments" shown below the upload-template card', 'Not present in this Figma frame', 'M'], fix: 'Confirm with design whether the "I do not have any gains from Indian Stock Investments" opt-out is intended on this screen; if yes add it to the Figma spec, otherwise remove it from the build.', specialPriority: 'Verify', ann: { on: 'live', x: 31, y: 78, w: 46, h: 5, element: '"No gains" opt-out checkbox', build: 'Present in build, absent from Figma frame' } },
       ],
     },
   },
