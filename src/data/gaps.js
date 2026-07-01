@@ -245,6 +245,32 @@ export const TABS = [
     },
   },
 
+  // ── S02c PRE-FILLED RETURN (Step 1.4 · validate ITD data) ──────────────────
+  {
+    id: 's02c',
+    label: '02c · Pre-filled',
+    kind: 'pair',
+    sectionHeader: { idx: '02c', title: 'Pre-filled Return — Validate ITD Data' },
+    compare: {
+      desc: 'Pre-filled return summary (Step 1.4): Income Received / Taxes Paid cards + Income/Taxes/Personal Details tabs + source table. Title copy & amounts differ (copy/test-data, not reported); visual gaps below.',
+      tag: 'SCENE 02c',
+      figma: { node: '8727:89266 · Incomes tab', url: 'figma · source of truth', img: '/figma-screenshots/scene07-prefilled.png', alt: 'Figma — pre-filled return (Incomes tab)' },
+      live: { node: 'frame_0154 · t=615s', url: 'indmoney.com · tax filing', img: '/video-frames/frame_0154_t00615s.jpg', alt: 'Live build — pre-filled return' },
+    },
+    block: {
+      id: 's02c-gaps',
+      header: 'Pre-filled Return — all gaps',
+      count: '4 gaps',
+      columns: ['#', 'Element', 'Build', 'Figma', 'Priority'],
+      rows: [
+        { id: 'P1', cells: ['', 'Row source icons', 'Flat monochrome icons; Interest, Capital Gains & Business Income all reuse a generic "%" circle icon', 'Distinct colourful icons per source (Capital Gains = bar chart, Business Income = briefcase, etc.)', 'H'], fix: 'Map each income source to its correct unique icon from the design-system asset set (bar-chart for Capital Gains, briefcase for Business Income, coin for Dividends) and use the coloured variants — not a generic % glyph.', ann: { on: 'live', x: 32, y: 52, w: 4, h: 8, element: 'Row source icons', build: 'Capital Gains & Business Income reuse a generic "%" icon' } },
+        { id: 'P2', cells: ['', 'Source tabs — segmented control', 'Three separate standalone pills with gaps; no connectors', 'Linked segmented control — pills joined by thin connector rails', 'M'], fix: 'Render the Income / Taxes / Personal Details toggle as one segmented control with connector rails between pills, per Figma.', ann: { on: 'live', x: 31, y: 9, w: 22, h: 8, element: 'Source tabs — segmented control', build: 'Separate pills, no connectors' } },
+        { id: 'P3', cells: ['', 'Confirm & Continue radius', 'Button corners ~10–12px (more pill-like)', '~8px corner radius', 'L'], fix: 'Set the primary CTA border-radius to 8px to match the design-system button.', ann: { on: 'live', x: 31, y: 88, w: 14, h: 8, element: 'Confirm & Continue radius', build: 'Corners ~10–12px' } },
+        { id: 'P4', cells: ['', 'Stat card border', 'Flat grey fill, no visible stroke', 'Subtle 1px border around each stat card', 'M'], fix: 'Add the 1px card stroke per the design-system surface style — confirm against Figma tokens.', specialPriority: 'Verify' },
+      ],
+    },
+  },
+
   // ── S03 UPLOADS ───────────────────────────────────────────────────────────
   {
     id: 's03',
