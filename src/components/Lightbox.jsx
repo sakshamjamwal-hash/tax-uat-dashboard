@@ -23,12 +23,18 @@ export default function Lightbox({ src, alt, annotations, onClose }) {
       animate="animate"
       exit="exit"
     >
+      <button
+        className="lb-x"
+        aria-label="Close"
+        onClick={(e) => { e.stopPropagation(); onClose() }}
+      >
+        ×
+      </button>
       <motion.div
         className="lb-wrap"
         onClick={e => e.stopPropagation()}
         variants={pop}
       >
-        <div className="lb-close">ESC / CLICK TO CLOSE</div>
         {hasAnns ? (
           <div className="lb-ann">
             <AnnotationLayer image={src} alt={alt} annotations={annotations} />

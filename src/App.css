@@ -901,10 +901,10 @@ tr:hover .del-row:hover { opacity: 1; color: var(--danger); }
 }
 .ann-tip {
   position: absolute;
-  bottom: calc(100% + 8px);
-  left: 0;
+  bottom: calc(100% + 10px);
+  left: -6px;
   width: max-content;
-  max-width: 280px;
+  max-width: 300px;
   background: var(--surface-2);
   border: 1px solid var(--border-strong);
   border-radius: var(--r-md);
@@ -915,11 +915,17 @@ tr:hover .del-row:hover { opacity: 1; color: var(--danger); }
   visibility: hidden;
   transform: translateY(4px);
   transition: opacity 0.14s ease, transform 0.14s ease;
-  z-index: 50;
+  z-index: 60;
   pointer-events: none;
   text-align: left;
 }
-.ann-box:hover .ann-tip {
+/* flip below the pin for gaps near the top edge */
+.ann-tip--below {
+  bottom: auto;
+  top: calc(100% + 10px);
+  transform: translateY(-4px);
+}
+.ann-box--active .ann-tip {
   opacity: 1;
   visibility: visible;
   transform: translateY(0);
@@ -1005,6 +1011,27 @@ tr:hover .del-row:hover { opacity: 1; color: var(--danger); }
   display: block;
   box-shadow: 0 0 80px rgba(0, 0, 0, 0.6);
 }
+.lb-x {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--fg);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-strong);
+  cursor: pointer;
+  z-index: 2010;
+  transition: background 0.15s, transform 0.1s;
+}
+.lb-x:hover { background: rgba(255, 255, 255, 0.16); }
+.lb-x:active { transform: scale(0.94); }
 .lb-close {
   position: absolute;
   top: -30px; right: 0;
